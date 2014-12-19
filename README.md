@@ -1,4 +1,4 @@
 PHP_XLSXReader
 ==============
 
-XLSX Excel Spreadsheet Writer in PHP
+XLSX Excel Spreadsheet Reader in PHP

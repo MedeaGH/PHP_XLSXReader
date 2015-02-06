@@ -51,12 +51,24 @@ class XLSXReader
 
 	public function getActiveSheet()
 	{
-		$sheetKeys = array_keys($this->sheets);
+		$i = 1;
 
-		if (is_null($this->activeSheet))
-			return $sheetKeys[0];
+		foreach ($this->sheets as $sheet)
+		{
+			if ($sheet["hidden"] === true)
+				continue;
 
-		return $sheetKeys[($this->activeSheet - 1)];
+			if (is_null($this->activeSheet))
+			{
+				return $sheet["id"];
+			}
+			elseif ($this->activeSheet == $i)
+			{
+				return $sheet["id"];
+			}
+
+			$i++;
+		}
 	}
 
 	protected function readWorkbook()
@@ -79,15 +91,13 @@ class XLSXReader
 			if ($xml->name === "sheet" && $xml->nodeType == XMLReader::ELEMENT)
 			{
 				$rID      = $xml->getAttribute("r:id");
-				$isHidden = $xml->getAttribute("state");
-
-				if ($isHidden == "hidden")
-					continue;
+				$isHidden = ($xml->getAttribute("state") == "hidden" ? true : false);
 
 				$this->sheets[$rID] = array (
-					"name" => $this->decodeString($xml->getAttribute("name")),
-					"id"   => $rID,
-					"file" => "",
+					"name"   => $this->decodeString($xml->getAttribute("name")),
+					"id"     => $rID,
+					"hidden" => $isHidden,
+					"file"   => ""
 				);
 			}
 		}

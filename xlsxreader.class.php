@@ -56,7 +56,7 @@ class XLSXReader
 		if (is_null($this->activeSheet))
 			return $sheetKeys[0];
 
-		return $sheetKeys[$this->activeSheet];
+		return $sheetKeys[($this->activeSheet - 1)];
 	}
 
 	protected function readWorkbook()
@@ -78,7 +78,11 @@ class XLSXReader
 
 			if ($xml->name === "sheet" && $xml->nodeType == XMLReader::ELEMENT)
 			{
-				$rID = $xml->getAttribute("r:id");
+				$rID      = $xml->getAttribute("r:id");
+				$isHidden = $xml->getAttribute("state");
+
+				if ($isHidden == "hidden")
+					continue;
 
 				$this->sheets[$rID] = array (
 					"name" => $this->decodeString($xml->getAttribute("name")),
@@ -137,10 +141,25 @@ class XLSXReader
 
 		while ($xml->read())
 		{
-			if ($xml->name === "t" && $xml->nodeType == XMLReader::ELEMENT)
+			if ($xml->name === "si" && $xml->nodeType == XMLReader::ELEMENT)
 			{
 				$node = $xml->expand();
-				$this->sharedStrings[] = $node->textContent;
+
+				if ($node->hasChildNodes())
+				{
+					if ($node->childNodes->length == 1 && $node->firstChild->nodeName == "t")
+					{
+						$this->sharedStrings[] = $node->firstChild->textContent;
+					}
+					else
+					{
+						$this->sharedStrings[] = "#";
+					}
+				}
+				else
+				{
+					$this->sharedStrings[] = "#";
+				}
 			}
 		}
 

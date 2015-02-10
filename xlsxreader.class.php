@@ -51,13 +51,10 @@ class XLSXReader
 
 	public function getActiveSheet()
 	{
-		$i = 1;
+		$i = 0;
 
 		foreach ($this->sheets as $sheet)
 		{
-			if ($sheet["hidden"] === true)
-				continue;
-
 			if (is_null($this->activeSheet))
 			{
 				return $sheet["id"];
